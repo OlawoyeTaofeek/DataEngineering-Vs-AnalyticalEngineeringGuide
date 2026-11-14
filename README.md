@@ -385,10 +385,11 @@ Distributed under the MIT License. See `LICENSE` for details.
 
 ## 👤 Author
 
-**[Your Name]**
+**Olawoye Taofeek**
 
 - GitHub: [@OlawoyeTaofeek](https://github.com/OlawoyeTaofeek)
-- LinkedIn: <!-- EDIT: your LinkedIn URL -->
+- LinkedIn: [@OlawoyeTaofeek]https://www.linkedin.com/in/olawoye-taofeek-a7862021a/ <!-- EDIT: your LinkedIn URL -->
+- twitter: ...
 
 ---
 
