@@ -1,0 +1,30 @@
+version: 2
+
+sources:
+  - name: jaffle_shop
+    description: Raw jaffle_shop app data
+    database: raw
+    schema: jaffle_shop
+    config:
+       loaded_at_field: _etl_loaded_at
+       freshness:
+          warn_after: 
+            count: 12
+            period: hour
+          error_after: 
+            count: 1
+            period: day
+          filter: "_etl_loaded_at >= dateadd('day', -3, current_timestamp)"  # At source level this get populated across the whole tables beneath it
+          # loaded_at_field: "to_timestamp(order_date)"   
+          # loaded_at_field: "convert_timezone('Africa/Lagos', 'UTC', created_at)"  # local time → UTC
+
+    tables:
+      - name: customers
+        description: Customer table
+      - name: orders
+        description: Orders table
+        config:
+          loaded_at_field: _etl_loaded_at
+          freshness:
+            warn_after:  {count: 12, period: hour}
+            error_after: {count: 24, period: hour}

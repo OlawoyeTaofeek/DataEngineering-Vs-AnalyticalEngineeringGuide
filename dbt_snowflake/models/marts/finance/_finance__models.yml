@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: fct_orders
+    description: One row per order, with the total amount from successful payments.
+    config:
+      materialized: table
+      tags: ['finance']             # was 'marketing', but this is a finance model
+      access: public
+      meta:
+        owner: finance team         # was 'marketing team'
+        slack_channel: '#data-finance'
+    columns:
+      - name: order_id
+        description: Primary key of the order
+        data_tests: [unique, not_null]
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_jaffle_shop__customers')
+                field: customer_id
+      - name: amount
+        data_tests: [not_null]

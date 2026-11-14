@@ -1,0 +1,6 @@
+[
+  {"id": 1, "name": "Asha", "address": {"city": "Lagos", "zip": "100001"},
+   "orders": [{"sku": "A1", "qty": 2}, {"sku": "B7", "qty": 1}]},
+  {"id": 2, "name": "Tunde", "address": {"city": "Abuja", "zip": null},
+   "orders": []}
+]

@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info/
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+profiles.yml
+*.p8
+*.pem
+*.key
+.dlt/secrets.toml
+*.tfvars
+
+# dbt
+target/
+dbt_packages/
+logs/
+.user.yml
+
+# Spark
+spark-warehouse/
+metastore_db/
+derby.log
+spark_csv/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# OS
+.DS_Store
+
+# Local
+new/

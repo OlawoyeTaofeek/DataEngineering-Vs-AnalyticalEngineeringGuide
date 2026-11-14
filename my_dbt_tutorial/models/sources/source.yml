@@ -1,0 +1,97 @@
+version: 2
+
+sources:
+  - name: source
+    description: Raw retail data (sales, returns, and dimensions)
+    database: dbt-masterclass
+    schema: source
+
+    tables:
+      - name: dim_customer
+        description: Customer details
+      - name: dim_date
+        description: Calendar / date dimension
+      - name: dim_product
+        description: Product details
+      - name: dim_store
+        description: Store details
+      - name: fact_returns
+        description: One row per product return
+
+      - name: fact_sales
+        description: One row per sale (line item)
+        columns:
+          - name: sales_id
+            description: Primary key of the sale
+            data_tests:
+              - unique
+              - not_null
+
+          - name: date_sk
+            description: Date of sale, joins to dim_date
+            data_tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('source', 'dim_date')
+                    field: date_sk
+
+          - name: store_sk
+            description: Store where the sale happened, joins to dim_store
+            data_tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('source', 'dim_store')
+                    field: store_sk
+
+          - name: product_sk
+            description: Product sold, joins to dim_product
+            data_tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('source', 'dim_product')
+                    field: product_sk
+
+          - name: customer_sk
+            description: Customer who bought, joins to dim_customer
+            data_tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('source', 'dim_customer')
+                    field: customer_sk
+
+          - name: promotion_sk
+            description: Promotion applied, if any (empty when no promotion)
+
+          - name: quantity
+            description: Number of units sold
+            data_tests:
+              - not_null
+
+          - name: unit_price
+            description: Price per unit
+            data_tests:
+              - not_null
+
+          - name: gross_amount
+            description: quantity x unit_price, before discount
+            data_tests:
+              - not_null
+
+          - name: discount_amount
+            description: Discount applied to the sale
+            data_tests:
+              - not_null
+
+          - name: net_amount
+            description: gross_amount minus discount_amount
+            data_tests:
+              - not_null
+
+          - name: payment_method
+            description: How the customer paid (card, cash, etc.)
+            data_tests:
+              - not_null

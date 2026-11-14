@@ -1,0 +1,14 @@
+models:
+  - name: is_holiday
+    config:
+      materialized: table
+      packages: ['pandas', 'pyarrow', 'holidays']
+    columns:
+      - name: date_day
+        data_tests: [unique, not_null]
+      - name: is_holiday
+        data_tests: [not_null]
+
+  - name: dim_holiday
+    config:
+      materialized: table
