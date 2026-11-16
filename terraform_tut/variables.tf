@@ -6,6 +6,10 @@ variable "file-content" {
     }
 }
 
+variable "filename" {
+    default = "C:/Users/user/Desktop/snowflake_lesson/pets.txt"
+}
+
 variable "prefix" {
     default = ["Mr", "Mrs", "Sir"]
     type = list(string)
@@ -47,3 +51,17 @@ variable "kitty" {
     type = tuple([ string, number, bool ])
     default = [ "cat", 7, false ]
 }
+
+variable "separator" {
+  type    = string
+  default = "-"
+}
+
+variable "length" {
+  type    = number
+  default = 2
+}
+
+## Command line Var:
+# terraform apply -var "filename="/root/pets.txt" -var "content=We love Pets!"
+    # -var "prefix=Mrs" -va "seperator=." -var "length=2"
