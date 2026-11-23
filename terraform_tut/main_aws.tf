@@ -1,11 +1,23 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
+resource "terraform_data" "recreate_trigger" {
+  input = "v1"    # change to "v2" to force the user to be recreated
+}
+
+
 resource "aws_iam_user" "admin_user" {
   name = "opeyemi"
   tags = {
     Description = "Technical Team Lead"
   }
+  force_destroy = true
+
+  lifecycle {
+    replace_triggered_by = [terraform_data.recreate_trigger]
+  }
+
+  
 }
 
 data "aws_iam_group" "existing" {
@@ -64,33 +76,22 @@ resource "aws_iam_role" "s3_access" {
 }
 
 # ---- 3. The access policy (what the role can do) ----
+# ---- 3. The access policy (what the role can do) ----
 data "aws_iam_policy_document" "s3_access" {
-  # Bucket-level action: listing
   statement {
     effect    = "Allow"
     actions   = ["s3:ListBucket"]
-    resources = [aws_s3_bucket.app.arn]
+    resources = [aws_s3_bucket.terraform_bucket.arn]
   }
 
-  # Object-level actions: read, write, delete
   statement {
     effect    = "Allow"
     actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
-    resources = ["${aws_s3_bucket.app.arn}/*"]
+    resources = ["${aws_s3_bucket.terraform_bucket.arn}/*"]
   }
 }
 
-resource "aws_iam_policy" "s3_access" {
-  name   = "app-s3-access-policy"
-  policy = data.aws_iam_policy_document.s3_access.json
-}
-
-resource "aws_iam_role_policy_attachment" "s3_access" {
-  role       = aws_iam_role.s3_access.name
-  policy_arn = aws_iam_policy.s3_access.arn
-}
-
-# ---- 4. Bucket policy (resource-based: restricts the bucket itself) ----
+# ---- 4. Bucket policy ----
 data "aws_iam_policy_document" "bucket" {
   statement {
     sid     = "AllowRoleAccess"
@@ -103,12 +104,11 @@ data "aws_iam_policy_document" "bucket" {
     }
 
     resources = [
-      aws_s3_bucket.app.arn,
-      "${aws_s3_bucket.app.arn}/*",
+      aws_s3_bucket.terraform_bucket.arn,
+      "${aws_s3_bucket.terraform_bucket.arn}/*",
     ]
   }
 
-  # Refuse any non-HTTPS request
   statement {
     sid     = "DenyInsecureTransport"
     effect  = "Deny"
@@ -120,8 +120,8 @@ data "aws_iam_policy_document" "bucket" {
     }
 
     resources = [
-      aws_s3_bucket.app.arn,
-      "${aws_s3_bucket.app.arn}/*",
+      aws_s3_bucket.terraform_bucket.arn,
+      "${aws_s3_bucket.terraform_bucket.arn}/*",
     ]
 
     condition {
@@ -132,10 +132,9 @@ data "aws_iam_policy_document" "bucket" {
   }
 }
 
-resource "aws_s3_bucket_policy" "app" {
-  bucket = aws_s3_bucket.app.id
+resource "aws_s3_bucket_policy" "terraform_bucket" {
+  bucket = aws_s3_bucket.terraform_bucket.id
   policy = data.aws_iam_policy_document.bucket.json
 
-  # Public access block must exist first, or the policy apply can race it
-  depends_on = [aws_s3_bucket_public_access_block.app]
+  depends_on = [aws_s3_bucket_public_access_block.terraform_bucket]
 }
