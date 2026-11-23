@@ -22,6 +22,10 @@ data "aws_iam_group" "existing_group" {
     group_name = "project-zomato-users"
 }
 
+resource "aws_iam_group" "group" {
+  name = "analytical-engineer"
+}
+
 data "aws_iam_policy_document" "s3_access" {
   statement {
     effect    = "Allow"
@@ -30,9 +34,17 @@ data "aws_iam_policy_document" "s3_access" {
   }
 }
 
-resource "aws_iam_user_group_membership" "admin-user" {
-    user = aws_iam_user.data_engineer.name
-    groups = [data.aws_iam_group.existing_group.group_name]
+resource "aws_iam_user_group_membership" "data_engineer" {
+  user = aws_iam_user.data_engineer.name
+  groups = [
+    data.aws_iam_group.existing_group.group_name,
+    aws_iam_group.group.name,
+  ]
+}
+
+resource "aws_iam_user_group_membership" "data_engineer_2" {
+  user   = aws_iam_user.data_engineer_2.name
+  groups = [aws_iam_group.group.name]
 }
 
 resource "aws_s3_bucket" "data" {
@@ -47,16 +59,16 @@ resource "aws_s3_bucket" "data" {
 resource "aws_iam_policy" "s3_access" {
     name = "${var.iam_user_name}-s3_access"
     description = "S3 Access IAM Policy"
-    policy = jsondecode(
+    policy = jsonencode(
         {
-            version = "2012-10-17"
-            statement = [
+            Version = "2012-10-17"
+            Statement = [
                 {
                     Action = [
                         "s3:List*",
                     ]
-                    effect = "Allow"
-                    resource = aws_s3_bucket.data.arn
+                    Effect = "Allow"
+                    Resource = aws_s3_bucket.data.arn
                 },
                 {
                     Effect = "Allow"
@@ -85,15 +97,3 @@ resource "aws_iam_policy" "new_s3_access" {
   policy = data.aws_iam_policy_document.s3_access.json
 }
 
-resource "aws_iam_group" "group" {
-  name = "analytical-engineer"
-}
-
-resource "aws_iam_group_membership" "engineering_team" {
-    name = "data-engineers-membership"
-    users = [
-        aws_iam_user.data_engineer.name,
-        aws_iam_user.data_engineer_2.name 
-    ]
-    group = aws_iam_group.group.name
-}
